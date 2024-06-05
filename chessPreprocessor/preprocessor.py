@@ -19,7 +19,7 @@ class Preprocessor:
 
     def read_pgn_from_string(self, pgn):
         """
-        Load game from string moves (like "1. e4 e5 2. Bc4 d6 3. Qh5 Nf6 4. Qxf7#")
+        Load game from string moves (like "1. e4 e5 2. Bc4 d6 3. Qh5 Nf6 4. Qxf7#", or in extended format with headers)
         :param pgn: string with moves in PGN
         :return: None
         """
@@ -69,7 +69,10 @@ class Preprocessor:
         for move in self._game.mainline_moves():
             top_moves = self._stockfish.get_top_moves(n)
             for i in range(n):
-                self._best_lines[i].append(top_moves[i])
+                if len(top_moves) <= i:
+                    self._best_lines[i].append(top_moves[-1])
+                else:
+                    self._best_lines[i].append(top_moves[i])
             self._stockfish.make_moves_from_current_position([move])
 
     def get_stats_per_move(self, add_wdl_stats=False, add_evaluation_stats=False, n_best_lines=0):
