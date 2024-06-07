@@ -1,3 +1,3 @@
-BOT_TOKEN = "7336889451:AAHaHk9Ou_aofd806bZpAlAJF3aYt5zCf7k"
+BOT_TOKEN = "TOKEN"
 PATH_TO_MODEL = "./content/model.pkl"
 CREATE_MODEL = True
