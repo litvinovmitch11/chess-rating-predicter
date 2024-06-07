@@ -18,6 +18,22 @@ def rating_to_category(number: int) -> str:
     return "Мастер спорта"
 
 
+def rating_to_category_easy(number: int) -> str:
+    if number < 1500:
+        return "Лох"
+    elif number < 2300:
+        return "Норм"
+    return "Красава"
+
+
+def rating_to_number_easy(number: int) -> int:
+    if number < 1400:
+        return 0
+    elif number < 1750:
+        return 1
+    return 2
+
+
 def rating_to_number(number: int) -> int:
     if number < 1350:
         return 0
