@@ -24,7 +24,7 @@ async def message_handler(msg: Message):
             game = msg.text
 
         try:
-            res = router.app.get_prediction(game)[0]
+            res = router.model.get_prediction(game)
         except Exception:
             await msg.reply(err_predict_msg)
             return

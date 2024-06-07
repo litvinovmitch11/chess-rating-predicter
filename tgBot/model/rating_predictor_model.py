@@ -1,11 +1,13 @@
-import pickle
-from sklearn.linear_model import LogisticRegression
-import pandas as pd
-from sklearn.model_selection import train_test_split
+import dill
 import numpy as np
+import pandas as pd
+import pickle
 
-from rating_to_category import rating_to_number
-from chessPreprocessor.preprocessor import Preprocessor
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+from modules.chessPreprocessor.preprocessor import Preprocessor
+from modules.utils.rating_to_category import rating_to_number
 
 
 # Обёртка для модели
@@ -135,36 +137,76 @@ def median_centipawns_black(game_id):
     return min_max_delta_centipawns(game_id, ost=1, want=2)
 
 
-if __name__ == "__main__":
-    model = LogisticRegression()
+class RatingPredictorModel:
+    def __init__(self, path=None):
+        if path is None:
+            self.model = LogisticRegression()
+            self.wrapper = TextModelWrapper(self.model)
+        else:
+            self.wrapper = dill.load(open(path, "rb"))
 
-    df_first240 = pd.read_csv("../data/first_240.csv")
-    df_from_240_to_360 = pd.read_csv("../data/from_240_to_360.csv")
-    df_from_360_to_480 = pd.read_csv("../data/from_360_480.csv")
-    df_moves = pd.concat([df_first240, df_from_240_to_360, df_from_360_to_480])
+    def fit(self):
+        df_first240 = pd.read_csv("../../data/first_240.csv")
+        df_from_240_to_360 = pd.read_csv("../../data/from_240_to_360.csv")
+        df_from_360_to_480 = pd.read_csv("../../data/from_360_480.csv")
+        df_moves = pd.concat([df_first240, df_from_240_to_360, df_from_360_to_480])
 
-    GAME_COUNT = 480
-    df_games = pd.read_csv("../data/clear_data.csv")
-    df_games = df_games.head(GAME_COUNT)
+        GAME_COUNT = 480
+        df_games = pd.read_csv("../../data/clear_data.csv")
+        df_games = df_games.head(GAME_COUNT)
 
-    df_games['white_percent_best_move'] = df_games['game_id'].apply(percent_best_move)
-    df_games['white_rating_num'] = df_games['white_elo'].apply(rating_to_number)
-    df_games['min_delta_centipawns_white'] = df_games['game_id'].apply(min_centipawns_white)
-    df_games['max_delta_centipawns_white'] = df_games['game_id'].apply(max_centipawns_white)
-    df_games['median_centipawns_white'] = df_games['game_id'].apply(median_centipawns_white)
+        df_games['white_percent_best_move'] = df_games['game_id'].apply(percent_best_move)
+        df_games['white_rating_num'] = df_games['white_elo'].apply(rating_to_number)
+        df_games['min_delta_centipawns_white'] = df_games['game_id'].apply(min_centipawns_white)
+        df_games['max_delta_centipawns_white'] = df_games['game_id'].apply(max_centipawns_white)
+        df_games['median_centipawns_white'] = df_games['game_id'].apply(median_centipawns_white)
 
-    df_train = df_games[['white_percent_best_move', 'min_delta_centipawns_white', 'max_delta_centipawns_white',
-                         'median_centipawns_white']]
-    x_train_white, x_test_white, y_train_white, y_test_white = train_test_split(
-        df_train, df_games['white_rating_num'],
-        train_size=0.8,
-        random_state=42)
-    model.fit(x_train_white, y_train_white)
+        df_train = df_games[['white_percent_best_move', 'min_delta_centipawns_white', 'max_delta_centipawns_white',
+                             'median_centipawns_white']]
+        x_train_white, x_test_white, y_train_white, y_test_white = train_test_split(
+            df_train, df_games['white_rating_num'],
+            train_size=0.8,
+            random_state=42)
+        self.model.fit(x_train_white, y_train_white)
+        self.wrapper = TextModelWrapper(self.model)
 
-    # Создание обёртки
-    wrapped_model = TextModelWrapper(model)
+    def predict(self, game):
+        return self.wrapper.predict(game)[0]
 
-    with open('content/model.pkl', 'wb') as f:
-        pickle.dump(wrapped_model, f)
+    def dump(self, path):
+        dill.dump(self.wrapper, open(path, 'wb'))
 
-    print("Модель успешно создана!")
+
+# if __name__ == "__main__":
+#     model = LogisticRegression()
+#
+#     df_first240 = pd.read_csv("../../data/first_240.csv")
+#     df_from_240_to_360 = pd.read_csv("../../data/from_240_to_360.csv")
+#     df_from_360_to_480 = pd.read_csv("../../data/from_360_480.csv")
+#     df_moves = pd.concat([df_first240, df_from_240_to_360, df_from_360_to_480])
+#
+#     GAME_COUNT = 480
+#     df_games = pd.read_csv("../../data/clear_data.csv")
+#     df_games = df_games.head(GAME_COUNT)
+#
+#     df_games['white_percent_best_move'] = df_games['game_id'].apply(percent_best_move)
+#     df_games['white_rating_num'] = df_games['white_elo'].apply(rating_to_number)
+#     df_games['min_delta_centipawns_white'] = df_games['game_id'].apply(min_centipawns_white)
+#     df_games['max_delta_centipawns_white'] = df_games['game_id'].apply(max_centipawns_white)
+#     df_games['median_centipawns_white'] = df_games['game_id'].apply(median_centipawns_white)
+#
+#     df_train = df_games[['white_percent_best_move', 'min_delta_centipawns_white', 'max_delta_centipawns_white',
+#                          'median_centipawns_white']]
+#     x_train_white, x_test_white, y_train_white, y_test_white = train_test_split(
+#         df_train, df_games['white_rating_num'],
+#         train_size=0.8,
+#         random_state=42)
+#     model.fit(x_train_white, y_train_white)
+#
+#     # Создание обёртки
+#     wrapped_model = TextModelWrapper(model)
+#
+#     with open('../content/model.pkl', 'wb') as f:
+#         pickle.dump(wrapped_model, f)
+#
+#     print("Модель успешно создана!")

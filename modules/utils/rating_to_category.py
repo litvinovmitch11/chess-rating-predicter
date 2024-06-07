@@ -20,10 +20,10 @@ def rating_to_category(number: int) -> str:
 
 def rating_to_category_easy(number: int) -> str:
     if number < 1500:
-        return "Лох"
+        return "Новичок"
     elif number < 2300:
-        return "Норм"
-    return "Красава"
+        return "Любитель"
+    return "Профессионал"
 
 
 def rating_to_number_easy(number: int) -> int:

@@ -1,13 +1,11 @@
 import asyncio
 
-import numpy as np
-
 import config
 import logging
 
 from aiogram import Bot, Dispatcher
 
-from model import MyModel
+from tgBot.model.rating_predictor_model import RatingPredictorModel
 from config import PATH_TO_MODEL
 from handlers import router
 
@@ -20,9 +18,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    if config.CREATE_DUMMY_MODEL:
-        model = MyModel()
-        model.fit(np.arange(2), np.arange(2))
+    if config.CREATE_MODEL:
+        model = RatingPredictorModel()
+        model.fit()
         model.dump(PATH_TO_MODEL)
     logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
