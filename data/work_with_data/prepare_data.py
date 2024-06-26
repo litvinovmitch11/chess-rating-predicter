@@ -7,7 +7,7 @@ from modules.utils.rating_to_category import rating_to_number
 import time
 
 THREAD_COUNT = 8
-STEP = 65
+STEP = 1
 START = 480
 
 
@@ -60,7 +60,7 @@ termination = np.empty(GAME_COUNT, dtype=object)
 game_ids = np.empty(GAME_COUNT, dtype=int)
 
 all_moves = []
-with open("../data/lichess_db_standard_rated_2013-01.pgn") as pgn:
+with open("lichess_db_standard_rated_2013-01.pgn") as pgn:
     start_time = time.time()
     print("Начал читать из файла pgn")
     while True:
