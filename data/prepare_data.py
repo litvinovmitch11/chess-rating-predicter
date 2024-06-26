@@ -28,6 +28,7 @@ def get_preprocessed_df(l, r, moves, _game_ids):
         df_stat['game_id'] = _game_ids[ind]
         df_stat['move_number'] = np.arange(df_stat['game_id'].shape[0])
         _all_stats.append(df_stat)
+    print(f"Отрезок [{l}, {r}) обработан за {time.time() - start_time_proc}\n")
 
     return _all_stats
 
@@ -116,4 +117,4 @@ print(
     f"Потоки завершились успешно. Общее время выполнения потоков: {time.time() - start_time_proc}.\n"
     f"Общее время выполнения программы: {time.time() - start_time}")
 res = pd.concat([i for i in all_res])
-res.to_csv(f"../data/from_{START}_to_{START + THREAD_COUNT * STEP}.csv", encoding='utf-8', index=False)
+res.to_csv(f"from_{START}_to_{START + THREAD_COUNT * STEP}.csv", encoding='utf-8', index=False)
